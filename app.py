@@ -46,7 +46,7 @@ def get_vector_store(chunks):
 
 def get_conversational_chain():
     prompt_template = """
-    Acting as reviewer, answer the question as detailed as possible from the provided context, make sure to provide all the details. If you are unsure about the coreect answer, add a note at the end stating that you are unsure about the correct answer, but still provide one.\n\n
+    Answer the question as detailed as possible from the provided context, make sure to provide all the details. If you are unsure about the coreect answer, add a note at the end stating that you are unsure about the correct answer, but still provide one. Highlight the most important concepts with markdown.\n\n
     Context:\n {context}?\n
     Question: \n{question}\n
 
@@ -85,33 +85,43 @@ def user_input(user_question):
     return response
 
 
+def initialise_with_pdf(filename="display.pdf"):
+    pdf_docs = [filename]
+    raw_text = get_pdf_text(pdf_docs)
+    text_chunks = get_text_chunks(raw_text)
+    get_vector_store(text_chunks)
+
+
 def main():
     st.set_page_config(
         page_title="Gemini PDF Chatbot",
         page_icon="🤖"
     )
 
-    # initialise with a given pdf
-    pdf_docs = ['initial.pdf']
-    raw_text = get_pdf_text(pdf_docs)
-    text_chunks = get_text_chunks(raw_text)
-    get_vector_store(text_chunks)
-    st.success("Done")
+    init_pdf_file = 'initial.pdf'
 
-    # Sidebar for uploading PDF files
-    with st.sidebar:
-        st.title("Menu:")
-        pdf_docs = st.file_uploader(
-            "Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
-        if st.button("Submit & Process"):
-            with st.spinner("Processing..."):
-                raw_text = get_pdf_text(pdf_docs)
-                text_chunks = get_text_chunks(raw_text)
-                get_vector_store(text_chunks)
-                st.success("Done")
+    # if the directory faiss_index is older than the file display.pdf
+    if os.path.exists("faiss_index"):
+        if os.path.getmtime("faiss_index/index.pkl") < os.path.getmtime(init_pdf_file):
+            initialise_with_pdf(init_pdf_file)
+    else:
+        initialise_with_pdf(init_pdf_file)
+    st.success("Ready")
+
+    # # Sidebar for uploading PDF files
+    # with st.sidebar:
+    #     st.title("Menu:")
+    #     pdf_docs = st.file_uploader(
+    #         "Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+    #     if st.button("Submit & Process"):
+    #         with st.spinner("Processing..."):
+    #             raw_text = get_pdf_text(pdf_docs)
+    #             text_chunks = get_text_chunks(raw_text)
+    #             get_vector_store(text_chunks)
+    #             st.success("Done")
 
     # Main content area for displaying chat messages
-    st.title("Chat with PDF files using Gemini🤖")
+    st.title("Chat about CMP3103 content using Gemini🤖")
     st.write("Welcome to the chat!")
     st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
@@ -120,7 +130,7 @@ def main():
 
     if "messages" not in st.session_state.keys():
         st.session_state.messages = [
-            {"role": "assistant", "content": "upload some pdfs and ask me a question"}]
+            {"role": "assistant", "content": "Talk to me about the CMP3103 module"}]
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
