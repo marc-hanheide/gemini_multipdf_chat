@@ -10,6 +10,7 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from uuid import uuid4
+from time import strftime
 
 load_dotenv()
 os.getenv("GOOGLE_API_KEY")
@@ -42,6 +43,7 @@ class GeminiPDFChatbot:
         text = ""
         for pdf in pdf_docs:
             pdf_reader = PdfReader(pdf)
+            print(pdf)
             for page in pdf_reader.pages:
                 text += page.extract_text()
         return text
@@ -54,6 +56,7 @@ class GeminiPDFChatbot:
 
     def get_vector_store(self, chunks):
         vector_store = FAISS.from_texts(chunks, embedding=self.embeddings)
+        print('storing into %s' % st.session_state.faiss_index_directory)
         vector_store.save_local(st.session_state.faiss_index_directory)
 
     def clear_chat_history(self):
@@ -72,7 +75,18 @@ class GeminiPDFChatbot:
         print(response)
         return response
 
+    def initialise_session(self):
+        if "session_id" not in st.session_state:
+            session_id = str(uuid4().hex)
+            print('new session with id %s' % session_id)
+            st.session_state.session_id = "%s" % session_id
+            session_directory = "sessions/%s" % session_id
+            os.makedirs(session_directory, exist_ok=True)
+            st.session_state.faiss_index_directory = "%s/faiss_index" % (session_directory)
+            st.session_state.session_directory = session_directory
+    
     def main(self):
+        self.initialise_session()
         st.set_page_config(
             page_title="Gemini PDF Chatbot",
             page_icon="🤖"
@@ -86,13 +100,12 @@ class GeminiPDFChatbot:
             if st.button("Submit & Process"):
                 with st.spinner("Processing..."):
                 # Initialization
-                    session_id = str(uuid4().hex)
-                    st.session_state.session_id = "%s" % session_id
-                    st.session_state.faiss_index_directory = "faiss_index_%s" % session_id
                     raw_text = self.get_pdf_text(pdf_docs)
+                    with open("%s/context.txt" % st.session_state.session_directory, "w") as f:
+                        f.write(raw_text)
                     text_chunks = self.get_text_chunks(raw_text)
                     self.get_vector_store(text_chunks)
-                    st.success("Done: session id %s")
+                    st.success("Done: session id %s" % st.session_state.session_id)
 
         # Main content area for displaying chat messages
         st.title("Chat with PDF files using Gemini🤖")
@@ -126,6 +139,10 @@ class GeminiPDFChatbot:
                         full_response += item
                         placeholder.markdown(full_response)
                     placeholder.markdown(full_response)
+                    timestamp_filename = "qa_%s.md" % strftime("%Y%m%d-%H%M%S")
+                    with open("%s/%s.txt" % (st.session_state.session_directory, timestamp_filename), "w") as f:
+                        f.write('# Prompt\n\n%s\n\n# Answer\n\n%s' % (prompt,full_response))
+
             if response is not None:
                 message = {"role": "assistant", "content": full_response}
                 st.session_state.messages.append(message)

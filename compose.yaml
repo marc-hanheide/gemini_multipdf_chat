@@ -8,6 +8,14 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
+  dev-server:
+    build:
+      context: .
+    ports:
+      - 8501
+    env_file:
+      - .env
+    command: streamlit run app-anypdf.py
   cmp3103-chat:
     image: lcas.lincoln.ac.uk/lcas/pdfchat:latest
     build:
