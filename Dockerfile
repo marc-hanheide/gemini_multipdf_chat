@@ -39,11 +39,14 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
 # Switch to the non-privileged user to run the application.
-RUN chmod 777 /app
+RUN chmod -R 777 /app
 USER appuser
 
 # Copy the source code into the container.
 COPY . .
+USER root
+RUN chown -R appuser /app && chmod -R 777 /app
+USER appuser
 
 # Expose the port that the application listens on.
 EXPOSE 8501

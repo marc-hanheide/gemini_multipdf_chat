@@ -8,27 +8,34 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  cmp3103-chat:
+    image: lcas.lincoln.ac.uk/lcas/pdfchat:latest
     build:
       context: .
     ports:
-      - 8501:8501
+      - 8501
     env_file:
       - .env
+    command: streamlit run app-cmp3103.py
+  pdfchat:
+    image: lcas.lincoln.ac.uk/lcas/pdfchat:latest
+    build:
+      context: .
+    ports:
+      - 8501
+    env_file:
+      - .env
+    command: streamlit run app-anypdf.py
   ngrok:
-    image: lcas.lincoln.ac.uk/lcas/ngrok1
-    env_file:
-      - .env
-    environment:
-      - PORT=8501
-      - HOST=server
-      - PROTO=https
-      - SUBDOMAIN=cmp3103-chat
+    image: lcas.lincoln.ac.uk/lcas/ngrok1:latest
+    volumes:
+      - ./ngrokrc:/app/.ngrok:ro
     build:
       context: .
       dockerfile: Dockerfile.ngrok
     links:
-      - server
+      - cmp3103-chat
+      - pdfchat
 
     
 
