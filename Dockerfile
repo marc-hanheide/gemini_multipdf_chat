@@ -24,8 +24,8 @@ ARG UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
+    --home "/app" \
+    --shell "/bin/bash" \
     --no-create-home \
     --uid "${UID}" \
     appuser
@@ -42,6 +42,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
 # Switch to the non-privileged user to run the application.
+RUN chmod 777 /app
 USER appuser
 
 # Copy the source code into the container.
