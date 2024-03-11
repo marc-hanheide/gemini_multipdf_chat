@@ -46,6 +46,8 @@ USER appuser
 COPY . .
 USER root
 RUN chown -R appuser /app && chmod -R 777 /app
+RUN apt-get update && apt-get install -y iproute2 curl inetutils-ping
+
 USER appuser
 
 # Expose the port that the application listens on.

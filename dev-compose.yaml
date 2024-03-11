@@ -8,31 +8,26 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  cmp3103-chat:
-    image: lcas.lincoln.ac.uk/lcas/pdfchat:latest
+  dev-server:
     build:
       context: .
-    ports:
-      - 8501
     env_file:
       - .env
-    command: streamlit run app-cmp3103.py
-  pdfchat:
-    image: lcas.lincoln.ac.uk/lcas/pdfchat:latest
-    build:
-      context: .
-    ports:
-      - 8501
-    env_file:
-      - .env
+    network_mode: "service:wireguard"
+    depends_on:
+      - wireguard
     command: streamlit run app-anypdf.py
-  ngrok:
-    image: lcas.lincoln.ac.uk/lcas/ngrok1:latest
+
+  wireguard:
+    container_name: wireguard
+    image: jordanpotter/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    ports:
+      - 8501:8501
+    sysctls:
+      net.ipv4.conf.all.src_valid_mark: 1
     volumes:
-      - ./ngrokrc:/app/.ngrok:ro
-    build:
-      context: .
-      dockerfile: Dockerfile.ngrok
-    links:
-      - cmp3103-chat
-      - pdfchat
+      - ./wg-config.conf:/etc/wireguard/wg0.conf
+    restart: unless-stopped
