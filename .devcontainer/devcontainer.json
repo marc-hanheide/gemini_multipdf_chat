@@ -15,7 +15,7 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-		"ghcr.io/devcontainers/features/git:1": {}
+		// "ghcr.io/devcontainers/features/git:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -31,6 +31,8 @@
 			]
 		}
 	},
+
+	"runArgs": ["--env-file",".env"],
 
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
 	// "runServices": [],

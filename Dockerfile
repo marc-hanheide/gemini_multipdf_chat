@@ -9,6 +9,9 @@
 ARG PYTHON_VERSION=3.10.0
 FROM python:${PYTHON_VERSION}-slim as base
 
+RUN apt-get update && apt-get install -y iproute2 curl inetutils-ping git
+
+
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -46,7 +49,6 @@ USER appuser
 COPY . .
 USER root
 RUN chown -R appuser /app && chmod -R 777 /app
-RUN apt-get update && apt-get install -y iproute2 curl inetutils-ping
 
 USER appuser
 

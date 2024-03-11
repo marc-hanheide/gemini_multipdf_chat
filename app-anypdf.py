@@ -66,7 +66,7 @@ class GeminiPDFChatbot:
     def user_input(self, user_question):
         if 'faiss_index_directory' not in st.session_state:
             raise "No faiss index directory found"
-        new_db = FAISS.load_local(st.session_state.faiss_index_directory, self.embeddings)
+        new_db = FAISS.load_local(st.session_state.faiss_index_directory, self.embeddings, allow_dangerous_deserialization=True)
         docs = new_db.similarity_search(user_question)
 
         response = self.chain(
