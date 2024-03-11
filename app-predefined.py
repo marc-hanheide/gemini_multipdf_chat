@@ -156,7 +156,7 @@ class GeminiPDFChatbot:
 
         if "messages" not in st.session_state.keys():
             st.session_state.messages = [
-                {"role": "assistant", "content": "Talk to me about the CMP3103 module"}]
+                {"role": "assistant", "content": "Ask me about anything in the available context"}]
 
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
