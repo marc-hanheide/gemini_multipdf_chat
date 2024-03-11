@@ -1,0 +1,14 @@
+server_addr: ngrok.lcas.group:4443
+trust_host_root_certs: true
+auth_token: SECRET
+tunnels:
+  cmp3103-chat:
+    subdomain: cmp3103-chat
+    auth: "computing:computing"
+    proto:
+      https: cmp3103-chat:8501
+  pdfchat:
+    subdomain: pdfchat
+    auth: "pdf:pdfchat"
+    proto:
+      https: pdfchat:8501

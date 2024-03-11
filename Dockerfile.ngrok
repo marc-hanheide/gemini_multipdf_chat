@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:22.04 as base
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y ca-certificates
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/app" \
+    --shell "/bin/bash" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+
+# Switch to the non-privileged user to run the application.
+RUN chmod 777 /app
+ADD https://github.com/marc-hanheide/network-scripts/raw/master/bin/ngrok1.lnx /usr/local/bin/ngrok1
+RUN chmod +x /usr/local/bin/ngrok1
+USER appuser
+
+# ENV NGROK_AUTH_TOKEN=""
+# ENV SUBDOMAIN="docker"
+# ENV HOST="localhost"
+# ENV PORT="80"
+# ENV AUTH=""
+# ENV SERVER_ADDR="ngrok.lcas.group:4443"
+# ENV PROTO="https"
+
+# RUN echo "#!/bin/sh" > /app/configure_ngrok.sh && \
+#     echo 'echo "server_addr: $SERVER_ADDR" > /app/.ngrok' >> /app/configure_ngrok.sh && \
+#     echo 'echo "trust_host_root_certs: true" >> /app/.ngrok' >> /app/configure_ngrok.sh && \
+#     echo 'echo "auth_token: $NGROK_AUTH_TOKEN" >> /app/.ngrok' >> /app/configure_ngrok.sh
+
+# RUN chmod +x /app/configure_ngrok.sh
+
+#CMD ["bash", "-c", "cat ./configure_ngrok.sh; ./configure_ngrok.sh; cat ~/.ngrok; while true; do ngrok1 -log stdout -subdomain \"$SUBDOMAIN\" -proto \"$PROTO\" -httpauth \"$AUTH\" ${HOST}:${PORT}; sleep 1; done"]
+
+CMD ["bash", "-c", "while true; do ngrok1 -log stdout start-all; sleep 1; done"]

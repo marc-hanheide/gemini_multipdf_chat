@@ -9,6 +9,9 @@
 ARG PYTHON_VERSION=3.10.0
 FROM python:${PYTHON_VERSION}-slim as base
 
+RUN apt-get update && apt-get install -y iproute2 curl inetutils-ping git
+
+
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -42,11 +45,15 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
 # Switch to the non-privileged user to run the application.
-RUN chmod 777 /app
+RUN chmod -R 777 /app
 USER appuser
 
 # Copy the source code into the container.
 COPY . .
+USER root
+RUN chown -R appuser /app && chmod -R 777 /app
+
+USER appuser
 
 # Expose the port that the application listens on.
 EXPOSE 8501

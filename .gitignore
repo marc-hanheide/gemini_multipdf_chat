@@ -1,3 +1,5 @@
 .env
 venv
 faiss_index
+ngrokrc
+sessions/
