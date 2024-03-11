@@ -78,8 +78,8 @@ class GeminiPDFChatbot:
 
     def initialise_with_pdf(self, filename="display.pdf"):
         pdf_docs = [filename]
-        raw_text = get_pdf_text(pdf_docs)
-        text_chunks = get_text_chunks(raw_text)
+        raw_text = self.get_pdf_text(pdf_docs)
+        text_chunks = self.get_text_chunks(raw_text)
         self.get_vector_store(text_chunks)
 
     def initialise_session(self):
@@ -90,6 +90,9 @@ class GeminiPDFChatbot:
             session_directory = "sessions/%s" % session_id
             os.makedirs(session_directory, exist_ok=True)
             st.session_state.session_directory = session_directory
+            # as this is a static file, always use the same faiss_index
+            st.session_state.faiss_index_directory = "static_faiss_index"
+
 
 
     def main(self):
@@ -102,8 +105,8 @@ class GeminiPDFChatbot:
         init_pdf_file = 'initial.pdf'
 
         # if the directory faiss_index is older than the file display.pdf
-        if os.path.exists("faiss_index"):
-            if os.path.getmtime("faiss_index/index.pkl") < os.path.getmtime(init_pdf_file):
+        if os.path.exists(st.session_state.faiss_index_directory):
+            if os.path.getmtime("%s/index.pkl" % st.session_state.faiss_index_directory) < os.path.getmtime(init_pdf_file):
                 self.initialise_with_pdf(init_pdf_file)
         else:
             self.initialise_with_pdf(init_pdf_file)
@@ -141,7 +144,7 @@ class GeminiPDFChatbot:
         # Main content area for displaying chat messages
         st.title("Chat about CMP3103 content using Gemini🤖")
         st.write("Welcome to the chat!")
-        st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+        st.sidebar.button('Clear Chat History', on_click=self.clear_chat_history)
         st.sidebar.write("*This service is provided 'as is' for students enrolled in the module CMP3103 at the University of Lincoln. It is not intended for any other use.*")
 
         # Chat input
@@ -181,4 +184,5 @@ class GeminiPDFChatbot:
 
 
 if __name__ == "__main__":
-    main()
+    chatbot = GeminiPDFChatbot()
+    chatbot.main()

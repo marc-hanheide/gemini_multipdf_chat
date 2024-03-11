@@ -1,5 +1,6 @@
 .env
 venv
 faiss_index
+static_faiss_index
 ngrokrc
 sessions/
