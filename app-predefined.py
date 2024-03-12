@@ -149,7 +149,7 @@ class GeminiPDFChatbot:
         st.title(os.getenv('TITLE', "Chat about the content of a PDF using Gemini🤖"))
         st.write("Welcome to the chat!")
         st.sidebar.button('Clear Chat History', on_click=self.clear_chat_history)
-        st.sidebar.write("*This service is provided 'as is' for students enrolled in the module CMP3103 at the University of Lincoln. It is not intended for any other use.*")
+        #st.sidebar.write("*This service is provided 'as is' for students enrolled in the module CMP3103 at the University of Lincoln. It is not intended for any other use.*")
 
         # Chat input
         # Placeholder for chat messages
